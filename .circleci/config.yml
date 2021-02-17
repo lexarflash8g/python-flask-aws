@@ -1,20 +1,33 @@
 # Use the latest 2.1 version of CircleCI pipeline process engine. See: https://circleci.com/docs/2.0/configuration-reference
-version: 2
+version: 2.1
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.15
+      - image: circleci/python:3.8.0
         auth:
           username: lexarflash8g
           password: $DOCKERHUB_PASSWORD
     steps:
-      - checkout:
+      - checkout
       - setup_remote_docker:
           version: 20.10.2
           docker_layer_caching:
       - run: |
           TAG=0.1.$CIRCLE_BUILD_NUM
           docker build -t lexarflash8g/python-flask-aws:$TAG
-          echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+          echo $DOCKERHUB_PASSWORD | docker login -u lexarflash8g --password-stdin
           docker push lexarflash8g/python-flask-aws:$TAG
-
+  test:
+    docker:
+      - image: circleci/python:3.8.0
+        auth:
+          username: lexarflash8g
+          password: $DOCKERHUB_PASSWORD
+    steps:
+      - checkout
+      - run: echo "this is a test"
+workflows:
+    build_and_test:
+      jobs:
+        - build
+        - test
