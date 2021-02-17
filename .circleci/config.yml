@@ -25,6 +25,21 @@ jobs:
     steps:
       - checkout
       - run: echo "this is a test"
+
+  deploy-infrastructure:
+    docker:
+    - image: amazon/aws-cli
+    steps:
+      - checkout
+      - run: yum -y install gzip tar
+      - run:
+          name: Ensure back-end infrastructure exists
+          command: |
+            aws cloudformation deploy \
+            --template-file kubernetes.yaml \
+            --tags project=python-flask-aws \
+            --stack-name "kubernetes-${CIRCLE_WORKFLOW_ID}" \
+            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"  
 workflows:
     build_and_test:
       jobs:
@@ -32,3 +47,4 @@ workflows:
         - test:
             requires:
               - build
+        - deploy-infrastructure

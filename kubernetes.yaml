@@ -1,0 +1,14 @@
+Resources:
+  myCluster:
+    Type: 'AWS::EKS::Cluster'
+    Properties:
+      Name: prod
+      Version: '1.14'
+      RoleArn: >-
+        arn:aws:iam::arn:aws:iam::130405883059:instance-profile/eksrole
+      ResourcesVpcConfig:
+        SecurityGroupIds:
+          - sg-002a01b3790748533
+        SubnetIds:
+          - subnet-229c2544
+          - subnet-11a2774b
