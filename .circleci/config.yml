@@ -39,7 +39,7 @@ jobs:
             --template-file kubernetes.yaml \
             --tags project=python-flask-aws \
             --stack-name "kubernetes-${CIRCLE_WORKFLOW_ID}" \
-            --parameter-overrides EKSClusterName=ekscluster-${CIRCLE_WORKFLOW_ID}, EKSIAMRoleName=eksrole-${CIRCLE_WORKFLOW_ID} \
+            --parameter-overrides EKSClusterName=ekscluster-prod, EKSIAMRoleName=eksrole-iam\
             --capabilities CAPABILITY_NAMED_IAM
 
       - run:
