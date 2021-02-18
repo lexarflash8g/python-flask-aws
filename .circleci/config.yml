@@ -26,7 +26,7 @@ jobs:
       - checkout
       - run: echo "this is a test"
 
-  deploy-infrastructure:
+  build-infrastructure:
     docker:
     - image: amazon/aws-cli
     steps:
@@ -39,7 +39,7 @@ jobs:
             --template-file kubernetes.yaml \
             --tags project=python-flask-aws \
             --stack-name "kubernetes-${CIRCLE_WORKFLOW_ID}" \
-            --parameter-overrides EKSClusterName=ekscluster-prod, EKSIAMRoleName=eksrole-iam \
+            --parameter-overrides EKSClusterName=eksclusterprod, EKSIAMRoleName=eksrole-iam \
             --capabilities CAPABILITY_NAMED_IAM
 
       - run:
@@ -51,8 +51,28 @@ jobs:
             --stack-name "kubernetes-${CIRCLE_WORKFLOW_ID}" \
             --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}" \
             --capabilities CAPABILITY_NAMED_IAM
+  deploy-infrastructure:
+    docker:
+      - image: amazon/aws-cli
+      steps:
+        - checkout
+        - run:
+            name: Install aws-iam-authenticator
+            command: |
+              curl -o aws-iam-authenticator curl -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.13.7/2019-06-11/bin/linux/amd64/aws-iam-authenticator
+              chmod +x ./aws-iam-authenticator
+              sudo mv ./aws-iam-authenticator /usr/local/bin/aws-iam-authenticator
+              - run:
+        - run: 
+            name: Install kubectl
+            command: |
+              curl -o kubectl https://amazon-eks.s3-us-west-2.amazonaws.com/1.13.7/2019-06-11/bin/linux/amd64/kubectl
+              chmod +x ./kubectl
+              sudo mv ./kubectl /usr/local/bin/kubectl
+    
 workflows:
     build_and_test:
       jobs:
         - deploy-infrastructure
+        - build-infrastructure
             
