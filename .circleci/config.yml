@@ -39,7 +39,7 @@ jobs:
             --template-file kubernetes.yaml \
             --tags project=python-flask-aws \
             --stack-name "kubernetes-${CIRCLE_WORKFLOW_ID}" \
-            --parameter-overrides EKSClusterName=eksclusterprod, EKSIAMRoleName=eksrole-iam \
+            --parameter-overrides EKSClusterName=eksclusterprod EKSIAMRoleName=eksrole-iam \
             --capabilities CAPABILITY_NAMED_IAM
 
       - run:
@@ -68,6 +68,12 @@ jobs:
             curl -o kubectl https://amazon-eks.s3-us-west-2.amazonaws.com/1.13.7/2019-06-11/bin/linux/amd64/kubectl
             chmod +x ./kubectl
             mv ./kubectl /usr/local/bin/kubectl
+      - run:
+          name: authenticate k8s
+          command: |
+            aws eks --region $AWS_DEFAULT_REGION update-kubeconfig --name EKSClusterName=eksclusterprod
+            kubectl get nodes
+            kubectl get pods 
     
 workflows:
     build_and_test:
