@@ -41,16 +41,6 @@ jobs:
             --stack-name "kubernetes-${CIRCLE_WORKFLOW_ID}" \
             --parameter-overrides EKSClusterName=eksclusterprod EKSIAMRoleName=eksrole-iam \
             --capabilities CAPABILITY_NAMED_IAM
-
-      - run:
-          name: Ensure back-end infrastructure exists
-          command: |
-            aws cloudformation deploy \
-            --template-file kubernetes.yaml \
-            --tags project=python-flask-aws \
-            --stack-name "kubernetes-${CIRCLE_WORKFLOW_ID}" \
-            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}" \
-            --capabilities CAPABILITY_NAMED_IAM
   deploy-infrastructure:
     docker:
       - image: amazon/aws-cli
@@ -71,13 +61,13 @@ jobs:
       - run:
           name: authenticate k8s
           command: |
-            aws eks --region $AWS_DEFAULT_REGION update-kubeconfig --name EKSClusterName=eksclusterprod
+            aws eks --region $AWS_DEFAULT_REGION update-kubeconfig --name eksclusterprod
             kubectl get nodes
             kubectl get pods 
     
 workflows:
     build_and_test:
       jobs:
-        - deploy-infrastructure
         - build-infrastructure
+        - deploy-infrastructure
             
