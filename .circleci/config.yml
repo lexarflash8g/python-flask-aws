@@ -39,6 +39,17 @@ jobs:
             --template-file kubernetes.yaml \
             --tags project=python-flask-aws \
             --stack-name "kubernetes-${CIRCLE_WORKFLOW_ID}" \
+            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}" \
+            --parameters EKSClusterName=ekscluster-${CIRCLE_WORKFLOW_ID},EKSIAMRoleName=eksrole-${CIRCLE_WORKFLOW_ID}, \
+            PrivateSubnet01Block=192.168.128.0/18,PrivateSubnet02Block=192.168.192.0/18,PublicSubnet01Block=192.168.0.0/18 \
+            PublicSubnet02Block=192.168.64.0/18, VpcBlock=192.168.0.0/16
+      - run:
+          name: Ensure back-end infrastructure exists
+          command: |
+            aws cloudformation deploy \
+            --template-file kubernetes.yaml \
+            --tags project=python-flask-aws \
+            --stack-name "kubernetes-${CIRCLE_WORKFLOW_ID}" \
             --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"  
 workflows:
     build_and_test:
@@ -47,4 +58,6 @@ workflows:
         - test:
             requires:
               - build
-        - deploy-infrastructure
+        - deploy-infrastructure:
+            requires:
+              - build
