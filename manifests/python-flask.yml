@@ -28,6 +28,6 @@ spec:
     spec:
       containers:
         - name: python-flask
-          image: lexarflash8g/python-flask-aws:{TAG}
+          image: lexarflash8g/python-flask-aws:$TAG
           ports:
             - containerPort: 80
