@@ -106,6 +106,7 @@ jobs:
             cd manifests
             yum install gettext -y
             TAG=$(curl -H "token: 789afc89-98ce-4b01-ba32-68736d639b50" --request GET https://api.memstash.io/values/TAG)
+            echo $TAG
             envsubst < python-flask.yml | kubectl apply -f -
             kubectl get pods
             sleep 40
