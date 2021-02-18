@@ -98,12 +98,24 @@ jobs:
             aws eks --region $AWS_DEFAULT_REGION update-kubeconfig --name eksclusterprod
             kubectl get nodes
             kubectl get pods 
+      - run:
+          name: deploy manifests
+            command: |
+              cd manifests
+              kubectl apply -f python-flask.yml
+              kubectl get pods
+              kubectl get svc
+              
+              
+            
     
 workflows:
     build_and_test:
       jobs:
         - lint
+        - build
         - deploy-infrastructure
+        
         #- build-infrastructure:
         #    requires:
         #      - lint
