@@ -103,7 +103,7 @@ jobs:
           name: deploy manifests
           command: |
             cd manifests
-            apk add gettext
+            yum install gettext
             export TAG=0.1.$CIRCLE_BUILD_NUM
             envsubst  < python-flask.yml 
             kubectl apply -f python-flask.yml
