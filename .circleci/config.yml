@@ -17,7 +17,8 @@ jobs:
          name: install dependencies
          command: |
            python3 -m venv venv
-           . venv/bin/activate
+           . venv/bin/activate 
+           make install
            wget -O hadolint https://github.com/hadolint/hadolint/releases/download/v1.22.1/hadolint-Linux-x86_64 &&\
            chmod +x hadolint &&\
            mv hadolint /bin/
@@ -104,7 +105,14 @@ jobs:
             cd manifests
             kubectl apply -f python-flask.yml
             kubectl get pods
+            sleep 40
             kubectl get svc
+      - run: 
+          name: smoke test
+          command: |
+            var=`kubectl get svc python-flask-aws -o yaml | grep hostname | awk '{print $3}'`
+            curl $var:81
+      
 
               
             
