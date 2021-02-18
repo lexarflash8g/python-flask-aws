@@ -1,5 +1,38 @@
 version: 2.1
 jobs:
+
+  lint:
+    docker:
+      - image: python:3
+    working_directory: ~/repo
+    steps:
+      - checkout
+# Download and cache dependencies
+      - restore_cache:
+          keys:
+           - v1-dependencies-{{ checksum "requirements.txt" }}
+# fallback to using the latest cache if no exact match is found
+           - v1-dependencies-
+      - run:
+         name: install dependencies
+         command: |
+           python3 -m venv venv
+           . venv/bin/activate
+           wget -O hadolint https://github.com/hadolint/hadolint/releases/download/v1.22.1/hadolint-Linux-x86_64 &&\
+           chmod +x hadolint &&\
+           mv hadolint /bin/
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+# run lint!
+      - run:
+          name: run lint
+          command: |
+            . venv/bin/activate
+            hadolint Dockerfile --ignore DL400 --ignore DL3042
+
   build:
     docker:
       - image: circleci/python:3.8.0
@@ -41,6 +74,7 @@ jobs:
             --stack-name "kubernetes-${CIRCLE_WORKFLOW_ID}" \
             --parameter-overrides EKSClusterName=eksclusterprod EKSIAMRoleName=eksrole-iam \
             --capabilities CAPABILITY_NAMED_IAM
+          no_output_timeout: 20m
   deploy-infrastructure:
     docker:
       - image: amazon/aws-cli
@@ -68,6 +102,11 @@ jobs:
 workflows:
     build_and_test:
       jobs:
-        - build-infrastructure
+        - lint
         - deploy-infrastructure
-            
+        #- build-infrastructure:
+        #    requires:
+        #      - lint
+        #- deploy-infrastructure:
+        #    requires:
+        #      - build-infrastructure
