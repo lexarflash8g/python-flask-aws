@@ -124,8 +124,10 @@ workflows:
     build_and_test:
       jobs:
         - lint
-        - deploy-infrastructure
-        
+        - build
+        - deploy-infrastructure:
+            requires:
+              - build
         #- build-infrastructure:
         #    requires:
         #      - lint
