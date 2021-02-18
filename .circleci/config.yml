@@ -108,16 +108,13 @@ jobs:
             kubectl get svc
             ENDPOINT=`kubectl get svc python-flask-aws -o yaml | grep hostname | awk '{print $3}'`
             curl -H "Content-Type: text/plain" -H "token: 789afc89-98ce-4b01-ba32-68736d639b50" --request PUT --data "$ENDPOINT" https://api.memstash.io/values/ENDPOINT    
-      - run: rolling update
+      - run: 
           name: perform a rolling update
           command: |
             cd manifests
             export TAG=latest
             cat rollingupdate.yml | envsubst | kubectl apply -f 
-            kubectl apply -f rollingupdate.yml
-
-          
-
+  
   smoke_test:
     docker:
       - image: circleci/python:3.8.0
