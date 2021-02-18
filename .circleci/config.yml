@@ -51,15 +51,7 @@ jobs:
           docker build -t lexarflash8g/python-flask-aws:$TAG .
           echo "$DOCKER_PASS" | docker login --username lexarflash8g --password-stdin
           docker push lexarflash8g/python-flask-aws:$TAG
-  test:
-    docker:
-      - image: circleci/python:3.8.0
-        auth:
-          username: lexarflash8g
-          password: $DOCKERHUB_PASSWORD
-    steps:
-      - checkout
-      - run: echo "this is a test"
+
 
   build-infrastructure:
     docker:
@@ -110,31 +102,39 @@ jobs:
             echo $TAG
             envsubst < python-flask.yml > python-flask-tag.yml
             cat python-flask-tag.yml
-            kubectl apply -f python-flask-tag.yml
-            kubectl get pods
+            cat python-flask-tag.yml | envsubst | kubectl apply -f -
             sleep 40
+            kubectl get pods
             kubectl get svc
+            ENDPOINT=`kubectl get svc python-flask-aws -o yaml | grep hostname | awk '{print $3}'`
+            curl -H "Content-Type: text/plain" -H "token: 789afc89-98ce-4b01-ba32-68736d639b50" --request PUT --data "$ENDPOINT" https://api.memstash.io/values/ENDPOINT
+          
+  smoke_test:
+    docker:
+      - image: circleci/python:3.8.0
+    steps:
+      - checkout
       - run: 
-          name: smoke test
+          name: smoke test to make sure endpoint is accessible
           command: |
-            var=`kubectl get svc python-flask-aws -o yaml | grep hostname | awk '{print $3}'`
-            curl $var:81
+            ENDPOINT=$(curl -H "token: 789afc89-98ce-4b01-ba32-68736d639b50" --request GET https://api.memstash.io/values/ENDPOINT)
+            curl $ENDPOINT:81
       
 
-              
+          
             
     
 workflows:
     build_and_test:
       jobs:
         - lint
-        - build
-        - deploy-infrastructure:
+        - build:
             requires:
-              - build
-        #- build-infrastructure:
-        #    requires:
-        #      - lint
-        #- deploy-infrastructure:
-        #    requires:
-        #      - build-infrastructure
+              - lint
+        - deploy-infrastructure:
+            requires: [build-infrastructure, build, lint]
+        - build-infrastructure:
+            requires: [build, lint] 
+        - smoke_test:
+            requires: [build,lint,build-infrastructure, deploy-infrastructure]
+ 
