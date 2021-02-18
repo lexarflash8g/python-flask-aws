@@ -39,7 +39,8 @@ jobs:
             --template-file kubernetes.yaml \
             --tags project=python-flask-aws \
             --stack-name "kubernetes-${CIRCLE_WORKFLOW_ID}" \
-            --parameter-overrides EKSClusterName=ekscluster-${CIRCLE_WORKFLOW_ID}, EKSIAMRoleName=eksrole-${CIRCLE_WORKFLOW_ID}
+            --parameter-overrides EKSClusterName=ekscluster-${CIRCLE_WORKFLOW_ID}, EKSIAMRoleName=eksrole-${CIRCLE_WORKFLOW_ID} \
+            --capabilities CAPABILITY_NAMED_IAM
 
       - run:
           name: Ensure back-end infrastructure exists
@@ -48,7 +49,8 @@ jobs:
             --template-file kubernetes.yaml \
             --tags project=python-flask-aws \
             --stack-name "kubernetes-${CIRCLE_WORKFLOW_ID}" \
-            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}" --capabilities CAPABILITY_NAMED_IAM
+            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}" \
+            --capabilities CAPABILITY_NAMED_IAM
 workflows:
     build_and_test:
       jobs:
