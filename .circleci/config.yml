@@ -48,14 +48,9 @@ jobs:
             --template-file kubernetes.yaml \
             --tags project=python-flask-aws \
             --stack-name "kubernetes-${CIRCLE_WORKFLOW_ID}" \
-            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}"  
+            --parameter-overrides ID="${CIRCLE_WORKFLOW_ID}" --capabilities CAPABILITY_NAMED_IAM
 workflows:
     build_and_test:
       jobs:
-        - build
-        - test:
-            requires:
-              - build
-        - deploy-infrastructure:
-            requires:
-              - build
+        - deploy-infrastructure
+            
