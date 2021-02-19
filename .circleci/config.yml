@@ -132,8 +132,8 @@ jobs:
       - run: 
           name: smoke test to make sure endpoint is accessible
           command: |
-            ENDPOINT=$(curl -H "token: 789afc89-98ce-4b01-ba32-68736d639b50" --request GET https://api.memstash.io/values/ENDPOINT)
-            curl $ENDPOINT:81
+            ENDPOINT=$(curl -H "token: 789afc89-98ce-4b01-ba32-68736d639b50" --request GET https://api.memstash.io/values/ENDPOINT):81
+            curl $ENDPOINT
       
 
           
@@ -141,15 +141,16 @@ jobs:
     
 workflows:
     build_and_test:
-      jobs:
-        - lint
-        - build:
-            requires:
-              - lint
-        - deploy-infrastructure:
-            requires: [build-infrastructure, build, lint]
-        - build-infrastructure:
-            requires: [build, lint] 
-        - smoke_test:
-            requires: [build,lint,build-infrastructure, deploy-infrastructure]
+       jobs:
+          - smoke_test
+      #   - lint
+      #   - build:
+      #       requires:
+      #         - lint
+      #   - deploy-infrastructure:
+      #       requires: [build-infrastructure, build, lint]
+      #   - build-infrastructure:
+      #       requires: [build, lint] 
+      #   - smoke_test:
+      #       requires: [build,lint,build-infrastructure, deploy-infrastructure]
  
