@@ -133,7 +133,7 @@ jobs:
 workflows:
     build_and_test:
       jobs:
-        - deploy-infrastructure
+        - deploy-infrastructure:
             requires:
               - build
         - build
