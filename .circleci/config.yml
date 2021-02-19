@@ -1,5 +1,4 @@
 version: 2.1
-jobs:
 commands:
   destroy-environment:
     description: Destroy cloudformation infrastructure if build fails
@@ -9,7 +8,7 @@ commands:
           when: on_fail
           command: |
             aws cloudformation delete-stack --stack-name "kubernetes-${CIRCLE_WORKFLOW_ID}" 
-
+jobs:
   lint:
     docker:
       - image: python:3
@@ -143,16 +142,14 @@ commands:
 workflows:
     build_and_test:
       jobs:
-        - deploy-infrastructure:
+        - lint
+        - build:
             requires:
-              - build
-        - build
-        #    requires:
-        #      - lint
-        #- deploy-infrastructure:
-        #    requires: [build-infrastructure, build, lint]
-        #- build-infrastructure:
-        #    requires: [build, lint] 
-        #- smoke_test:
-        #    requires: [build,lint,build-infrastructure, deploy-infrastructure]
+              - lint
+        - deploy-infrastructure:
+            requires: [build-infrastructure, build, lint]
+        - build-infrastructure:
+            requires: [build, lint] 
+        - smoke_test:
+            requires: [build,lint,build-infrastructure, deploy-infrastructure]
  
