@@ -142,15 +142,14 @@ jobs:
 workflows:
     build_and_test:
        jobs:
-          - smoke_test
-      #   - lint
-      #   - build:
-      #       requires:
-      #         - lint
-      #   - deploy-infrastructure:
-      #       requires: [build-infrastructure, build, lint]
-      #   - build-infrastructure:
-      #       requires: [build, lint] 
-      #   - smoke_test:
-      #       requires: [build,lint,build-infrastructure, deploy-infrastructure]
+        - lint
+        - build:
+            requires:
+              - lint
+        - deploy-infrastructure:
+            requires: [build-infrastructure, build, lint]
+        - build-infrastructure:
+            requires: [build, lint] 
+        - smoke_test:
+            requires: [build,lint,build-infrastructure, deploy-infrastructure]
  
