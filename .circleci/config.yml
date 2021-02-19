@@ -1,5 +1,14 @@
 version: 2.1
 jobs:
+commands:
+  destroy-environment:
+    description: Destroy cloudformation infrastructure if build fails
+    steps:
+      - run:
+          name: Destroy environments
+          when: on_fail
+          command: |
+            aws cloudformation delete-stack --stack-name "kubernetes-${CIRCLE_WORKFLOW_ID}" 
 
   lint:
     docker:
@@ -114,6 +123,7 @@ jobs:
             cd manifests
             export TAG=latest
             cat rollingupdate.yml | envsubst | kubectl apply -f -
+      - destroy-environment
   
   smoke_test:
     docker:
