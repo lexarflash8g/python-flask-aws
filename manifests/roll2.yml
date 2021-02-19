@@ -19,7 +19,7 @@ spec:
         app: python-flask
     spec:
       containers:
-        - image: lexarflash8g/python-flask-aws:$TAG
+        - image: lexarflash8g/python-flask-aws:latest
           imagePullPolicy: Always
           name: python-flask
           ports:
