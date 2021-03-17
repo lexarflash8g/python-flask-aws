@@ -41,7 +41,41 @@ jobs:
           command: |
             . venv/bin/activate
             hadolint Dockerfile --ignore DL400 --ignore DL3042
+  trivyscan:
+    docker:
+      - image: docker:18.09-git
+    steps:
+      - checkout
+      - setup_remote_docker
+      - restore_cache:
+          key: vulnerability-db
+      - run:
+          name: Build image
+          command: docker build -t trivy-ci-test:${CIRCLE_SHA1} .
+      - run:
+          name: Install trivy
+          command: |
+            apk add --update curl
+            VERSION=$(
+                curl --silent "https://api.github.com/repos/aquasecurity/trivy/releases/latest" | \
+                grep '"tag_name":' | \
+                sed -E 's/.*"v([^"]+)".*/\1/'
+            )
 
+            wget https://github.com/aquasecurity/trivy/releases/download/v${VERSION}/trivy_${VERSION}_Linux-64bit.tar.gz
+            tar zxvf trivy_${VERSION}_Linux-64bit.tar.gz
+            mv trivy /usr/local/bin
+      - run:
+          name: Scan the local image with trivy
+          command: trivy --exit-code 1 --severity CRITICAL --no-progress --auto-refresh trivy-ci-test:${CIRCLE_SHA1}
+      - save_cache:
+          key: vulnerability-db
+          paths:
+            - $HOME/.cache/trivy
+#Add the Step 6 here
+#Add the Step 5 here
+#Add the Step 4 here
+#Add the Step 3 here
   build:
     docker:
       - image: circleci/python:3.8.0
@@ -142,14 +176,14 @@ jobs:
 workflows:
     build_and_test:
        jobs:
-        - lint
+        - trivyscan
         - build:
             requires:
-              - lint
+              - trivyscan
         - deploy-infrastructure:
-            requires: [build-infrastructure, build, lint]
+            requires: [build-infrastructure, build, trivyscan]
         - build-infrastructure:
-            requires: [build, lint] 
+            requires: [build, trivyscan] 
         - smoke_test:
-            requires: [build,lint,build-infrastructure, deploy-infrastructure]
+            requires: [build,trivyscan,build-infrastructure, deploy-infrastructure]
  
