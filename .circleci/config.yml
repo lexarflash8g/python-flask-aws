@@ -55,7 +55,7 @@ jobs:
       - run:
           name: Install trivy
           command: |
-            apk add --update-cache --update curl
+            apk add --no-cache-add --upgrade curl
             VERSION=$(
                 curl --silent "https://api.github.com/repos/aquasecurity/trivy/releases/latest" | \
                 grep '"tag_name":' | \
